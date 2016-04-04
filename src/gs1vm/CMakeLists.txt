@@ -9,3 +9,5 @@ add_library(
         GStringFormatter.cpp        ../../include/gs1/vm/GStringFormatter.hpp
         ../../include/gs1/vm/Stack.hpp
 )
+
+target_link_libraries(gs1vm gs1common gs1parse gs1compiler)

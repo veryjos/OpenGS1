@@ -1,32 +1,16 @@
-#include "GFlagLibrary.hpp"
-#include "GStringLibrary.hpp"
 #include <gs1/compiler/CompileVisitor.hpp>
 #include <gs1/parse/Parser.hpp>
 
 #include <gs1/vm/Device.hpp>
 
-using namespace gs1;
+#include "GFlagLibrary.hpp"
+#include "GStringLibrary.hpp"
 
-void observer(const Diag &d)
-{
-  switch (d.severity) {
-  case Diag::Info:
-    printf("info: %d@%d: %s\n", d.pos.line + 1, d.pos.offset,
-           d.message.c_str());
-    break;
-  case Diag::Warning:
-    printf("warning: %d@%d: %s\n", d.pos.line + 1, d.pos.offset,
-           d.message.c_str());
-    break;
-  case Diag::Error:
-    printf("error: %d@%d: %s\n", d.pos.line + 1, d.pos.offset,
-           d.message.c_str());
-    break;
-  }
-}
+using namespace gs1;
 
 int main(int argc, const char *argv[])
 {
+  // Prototypes for commands/functions are necessary for correct parsing
   PrototypeMap cmds = {
       {"setarray", {false, false}},
       {"freezeplayer", {false}},
@@ -51,7 +35,7 @@ int main(int argc, const char *argv[])
       {"addstring", {true, true}},
   };
 
-  PrototypeMap funs = {
+  PrototypeMap funcs = {
       {"strtofloat", {true}},
   };
 
@@ -62,34 +46,35 @@ int main(int argc, const char *argv[])
     else
       path = "../example/test.gs";
 
-    FileSource source(path);
-    DiagBuilder diag(observer);
-    CompileVisitor visitor(source);
-    Lexer lexer(diag, source);
-    Parser parser(diag, lexer, cmds, funs);
-
-    auto tree = parser.Parse();
-    tree->Accept(&visitor);
-    ByteBuffer bytecodeBytes = visitor.GetBytecode();
-
     Device device;
 
-    auto flagLibrary = device.LoadLibrary<GFlagLibrary>();
-    auto stringLibrary = device.LoadLibrary<GStringLibrary>();
-
+    // Create variable store
     auto primaryVarStore = device.CreateVarStore();
+
+    // Create context
     auto context = device.CreateContext(primaryVarStore);
 
+    // Compile source file to bytecode
+    auto bytecodeBytes = device.CompileSourceFromFile(path, cmds, funcs);
+
+    // Load bytecode to device and link to context
     auto bytecode = device.LoadBytecode(bytecodeBytes.GetBytes(),
                                         bytecodeBytes.GetLength());
     context->LinkBytecode(bytecode);
 
+    // Create "this." varstore for context-local variables
     auto thisVarStore = device.CreateVarStore();
     context->LinkVarStore(thisVarStore, "this.");
 
+    // Load and link the flag library (set, unset)
+    auto flagLibrary = device.LoadLibrary<GFlagLibrary>();
     context->LinkLibrary(flagLibrary);
+
+    // Load and link the string library (setstring, addstring..)
+    auto stringLibrary = device.LoadLibrary<GStringLibrary>();
     context->LinkLibrary(stringLibrary);
 
+    // Set event flags for running the context
     GVarStore eventflags;
     eventflags.SetValue("created", GVARTYPE_FLAG, true);
 

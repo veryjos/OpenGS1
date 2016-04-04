@@ -1,6 +1,8 @@
 #ifndef GS1VM_DEVICE_HPP
 #define GS1VM_DEVICE_HPP
 
+#include <gs1/common/ByteBuffer.hpp>
+#include <gs1/parse/Parser.hpp>
 #include <gs1/vm/Context.hpp>
 
 namespace gs1
@@ -30,6 +32,11 @@ public:
   std::shared_ptr<Bytecode> LoadBytecode(const char *data, unsigned int len);
 
   std::shared_ptr<GVarStore> CreateVarStore();
+
+  ByteBuffer CompileSourceFromString(std::string str, PrototypeMap cmds,
+                                     PrototypeMap funcs);
+  ByteBuffer CompileSourceFromFile(std::string path, PrototypeMap cmds,
+                                   PrototypeMap funcs);
 
 private:
   std::unordered_map<std::string, std::shared_ptr<GLibrary>> libraries;

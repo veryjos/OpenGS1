@@ -1,3 +1,4 @@
+#include <gs1/compiler/CompileVisitor.hpp>
 #include <gs1/vm/Device.hpp>
 
 using namespace gs1;
@@ -5,6 +6,54 @@ using namespace gs1;
 Device::Device() {}
 
 Device::~Device() {}
+
+void observer(const Diag &d)
+{
+  switch (d.severity) {
+  case Diag::Info:
+    printf("info: %d@%d: %s\n", d.pos.line + 1, d.pos.offset,
+           d.message.c_str());
+    break;
+  case Diag::Warning:
+    printf("warning: %d@%d: %s\n", d.pos.line + 1, d.pos.offset,
+           d.message.c_str());
+    break;
+  case Diag::Error:
+    printf("error: %d@%d: %s\n", d.pos.line + 1, d.pos.offset,
+           d.message.c_str());
+    break;
+  }
+}
+
+ByteBuffer Device::CompileSourceFromString(std::string str, PrototypeMap cmds,
+                                           PrototypeMap funcs)
+{
+  MemorySource source(str.c_str());
+  DiagBuilder diag(observer);
+  CompileVisitor visitor(source);
+  Lexer lexer(diag, source);
+  Parser parser(diag, lexer, cmds, funcs);
+
+  auto tree = parser.Parse();
+  tree->Accept(&visitor);
+
+  return visitor.GetBytecode();
+}
+
+ByteBuffer Device::CompileSourceFromFile(std::string path, PrototypeMap cmds,
+                                         PrototypeMap funcs)
+{
+  FileSource source(path);
+  DiagBuilder diag(observer);
+  CompileVisitor visitor(source);
+  Lexer lexer(diag, source);
+  Parser parser(diag, lexer, cmds, funcs);
+
+  auto tree = parser.Parse();
+  tree->Accept(&visitor);
+
+  return visitor.GetBytecode();
+}
 
 std::shared_ptr<Context>
 Device::CreateContext(std::shared_ptr<GVarStore> primaryVarStore)
