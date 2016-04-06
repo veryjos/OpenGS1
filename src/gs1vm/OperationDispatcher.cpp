@@ -197,6 +197,21 @@ OperationDispatcher::OperationDispatcher()
            value.GetNumber());
   };
 
+  operationHandlers[OP_CALL] = [&](Context *context) {
+    PackedValue &packedCommandName =
+        *(PackedValue *)context->instructionPointer;
+    context->instructionPointer += sizeof(PackedValue);
+
+    std::string commandName =
+        ((GStringVariable *)context->UnpackValue(packedCommandName)
+             .GetVariable())
+            ->string;
+
+    printf("CMD_CALL: %s\n", commandName.c_str());
+
+    context->CallFunction(commandName);
+  };
+
   operationHandlers[OP_CMD_CALL] = [&](Context *context) {
     PackedValue &packedCommandName =
         *(PackedValue *)context->instructionPointer;

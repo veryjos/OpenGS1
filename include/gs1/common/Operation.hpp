@@ -35,6 +35,7 @@ enum Opcode {
   OP_DEC,     //  SET (S(0) = S(0) - 1)
   OP_DECPUSH, //  PUSH (S(0)), SET (S(0) = S(0) - 1)
 
+  OP_CALL,     //  Pushes # of args, followed by args
   OP_CMD_CALL, //  Pushes # of args, followed by args
 
   OP_JMP, //  JUMP to N(0, 4) by byte offset unconditionally

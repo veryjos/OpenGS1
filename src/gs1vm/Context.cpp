@@ -219,6 +219,20 @@ void Context::CallCommand(const std::string &name)
   }
 }
 
+void Context::CallFunction(const std::string &name)
+{
+  // Call function by library
+  std::function<void(Context * context)> *func;
+
+  for (auto &lib : linkedLibraries) {
+    if ((func = lib.GetLibrary()->GetFunction(name))) {
+      (*func)(this);
+
+      break;
+    }
+  }
+}
+
 // TODO:
 // Clean this up..
 // This should be part of AST generation, perhaps

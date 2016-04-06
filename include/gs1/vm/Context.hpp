@@ -109,6 +109,7 @@ public:
   std::string InterpolateString(std::string string);
 
   void CallCommand(const std::string &name);
+  void CallFunction(const std::string &name);
 
   void Eval(const std::string &code, const Stack &stack);
   void Run(GVarStore *eventFlags = nullptr);

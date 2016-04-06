@@ -559,15 +559,16 @@ void CompileVisitor::Visit(ExprCall *node)
 {
   PrintEnterNode(node, "ExprCall");
 
-  // Push number of arguments
-  // followed by the call
-  // body.Emit(OP_CALL);
-  // body.Emit((uint8_t) node->args.size());
+  std::string &commandName = ((ExprId *)node->left)->name->token.text;
+  ConstantKey nameKey = header.constStringTable->GetKey(commandName);
 
-  // Visit children nodes
-  // This should emit the ID of the function name,
-  // followed by any arguments.
-  SyntaxTreeVisitor::Visit(node);
+  // Visit argument nodes
+  for (auto &arg : node->args)
+    arg->Accept(this);
+
+  // Emit call and function name
+  body.Emit(OP_CALL);
+  body.Emit(PackedValue(PACKVALUE_CONST_STRING, nameKey.index));
 
   PrintLeaveNode();
 }

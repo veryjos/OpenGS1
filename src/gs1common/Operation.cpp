@@ -45,6 +45,9 @@ std::string gs1::OpcodeToString(Opcode opcode)
   case OP_DECPUSH:
     return "OP_DECPUSH";
 
+  case OP_CALL:
+    return "OP_CALL";
+
   case OP_CMD_CALL:
     return "OP_CMD_CALL";
 
