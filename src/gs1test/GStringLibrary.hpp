@@ -39,6 +39,19 @@ public:
                (strVariable->string + strValue).c_str());
       }
     });
+
+    RegisterFunction("strtofloat", [&](Context *context) {
+      std::string strValue =
+          context->InterpolateString(context->stack.Pop().GetString());
+
+      try {
+        context->stack.Push(std::stof(strValue));
+      }
+
+      catch (...) {
+        context->stack.Push(0.0f);
+      }
+    });
   };
 
   ~GStringLibrary(){};
