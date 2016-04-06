@@ -1,6 +1,8 @@
 #ifndef GS1PARSE_DEPTHVISITOR_HPP
 #define GS1PARSE_DEPTHVISITOR_HPP
 
+#include <gs1/parse/SyntaxTreeVisitor.hpp>
+
 namespace gs1
 {
 class DepthVisitor : public SyntaxTreeVisitor
