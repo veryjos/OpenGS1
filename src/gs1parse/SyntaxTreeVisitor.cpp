@@ -42,6 +42,8 @@ void SyntaxTreeVisitor::Visit(StmtBreak *node) { Visit((Stmt *)node); }
 
 void SyntaxTreeVisitor::Visit(StmtContinue *node) { Visit((Stmt *)node); }
 
+void SyntaxTreeVisitor::Visit(StmtReturn *node) { Visit((Stmt *)node); }
+
 void SyntaxTreeVisitor::Visit(StmtCommand *node) { Visit((Stmt *)node); }
 
 void SyntaxTreeVisitor::Visit(StmtFunctionDecl *node) { Visit((Stmt *)node); }

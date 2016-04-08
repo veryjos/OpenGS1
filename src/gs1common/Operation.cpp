@@ -54,6 +54,12 @@ std::string gs1::OpcodeToString(Opcode opcode)
   case OP_JMP:
     return "OP_JMP";
 
+  case OP_JAL:
+    return "OP_JAL";
+
+  case OP_RET:
+    return "OP_RET";
+
   case OP_EQ:
     return "OP_EQ";
 
@@ -84,8 +90,8 @@ std::string gs1::OpcodeToString(Opcode opcode)
   case OP_JNZ:
     return "OP_JNZ";
 
-  case OP_EOF:
-    return "OP_EOF";
+  case OP_STOP:
+    return "OP_STOP";
 
   case OP_DBG_OUT:
     return "OP_DBG_OUT";

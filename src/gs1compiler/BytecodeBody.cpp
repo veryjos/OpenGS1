@@ -65,6 +65,13 @@ unsigned int BytecodeBody::GetCurrentPosition()
   return byteBuffer.GetLength();
 }
 
+void BytecodeBody::BeginFunction(std::string name)
+{
+  // Emit the stop
+}
+
+void BytecodeBody::EndFunction() {}
+
 Reservation BytecodeBody::Reserve(unsigned int numBytes)
 {
   printf("%5d EMIT RESERVED %d\n", byteBuffer.GetLength(), numBytes);

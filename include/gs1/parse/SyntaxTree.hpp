@@ -118,6 +118,12 @@ struct StmtContinue : public Stmt {
   virtual std::string GetType() const { return "StmtContinue"; };
 };
 
+struct StmtReturn : public Stmt {
+  virtual void Accept(SyntaxTreeVisitor *v) { v->Visit(this); }
+
+  virtual std::string GetType() const { return "StmtReturn"; };
+};
+
 struct StmtCommand : public Stmt {
   virtual void Accept(SyntaxTreeVisitor *v) { v->Visit(this); }
 

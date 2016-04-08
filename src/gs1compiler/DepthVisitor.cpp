@@ -43,6 +43,8 @@ void DepthVisitor::Visit(StmtBreak *node) { Visit((Stmt *)node); }
 
 void DepthVisitor::Visit(StmtContinue *node) { Visit((Stmt *)node); }
 
+void DepthVisitor::Visit(StmtReturn *node) { Visit((Stmt *)node); }
+
 void DepthVisitor::Visit(StmtCommand *node) { Visit((Stmt *)node); }
 
 void DepthVisitor::Visit(StmtFunctionDecl *node) { Visit((Stmt *)node); }

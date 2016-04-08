@@ -146,6 +146,8 @@ Stmt *Parser::ParseStmt(bool optional)
     return ParseStmtBreak();
   case TokKwContinue:
     return ParseStmtContinue();
+  case TokKwReturn:
+    return ParseStmtReturn();
   case TokKwFunction: {
     auto node = ParseStmtFunctionDecl();
     if (stack.size() != 1) {
@@ -288,6 +290,18 @@ Stmt *Parser::ParseStmtContinue()
   PushNode(node);
   {
     EatTerminal(TokKwContinue);
+    EatTerminal(TokSemicolon);
+  }
+  PopNode();
+  return node;
+}
+
+Stmt *Parser::ParseStmtReturn()
+{
+  auto node = new StmtReturn();
+  PushNode(node);
+  {
+    EatTerminal(TokKwReturn);
     EatTerminal(TokSemicolon);
   }
   PopNode();

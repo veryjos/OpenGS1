@@ -30,6 +30,8 @@ public:
 
   void Visit(StmtContinue *node);
 
+  void Visit(StmtReturn *node);
+
   void Visit(StmtCommand *node);
 
   void Visit(StmtFunctionDecl *node);

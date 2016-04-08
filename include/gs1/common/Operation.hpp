@@ -39,6 +39,8 @@ enum Opcode {
   OP_CMD_CALL, //  Pushes # of args, followed by args
 
   OP_JMP, //  JUMP to N(0, 4) by byte offset unconditionally
+  OP_JAL, //  JUMP as per prior semantic and pass last location to jump stack
+  OP_RET, //  Return to location on top of on jump stack
 
   OP_EQ,  //  PUSH (S(1) == S(0))
   OP_LT,  //  PUSH (S(1) < S(0))
@@ -53,7 +55,7 @@ enum Opcode {
   OP_JEZ, //  JUMP to N(0, 4) if S(0) == 0
   OP_JNZ, //  JUMP to N(0, 4) if S(0) != 0
 
-  OP_EOF, //  End of file
+  OP_STOP, // Stops execution
 
   OP_DBG_OUT, //  Debug output
 

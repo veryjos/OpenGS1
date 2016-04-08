@@ -30,5 +30,7 @@ ByteBuffer BytecodeHeader::GetByteBuffer()
 
   buffer.WriteU32(buffer.GetLength(), bodyOffsetReservation);
 
+  // Write function names and offsets
+
   return buffer;
 }

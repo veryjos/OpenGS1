@@ -237,6 +237,24 @@ OperationDispatcher::OperationDispatcher()
     printf("JMP: Jumping by %d\n", offset);
   };
 
+  operationHandlers[OP_JAL] = [&](Context *context) {
+    // Get byte offset
+    int32_t offset = *(int32_t *)context->instructionPointer;
+
+    // Jump to offset and link
+    context->BranchAndLink((context->instructionPointer + offset) -
+                           context->currentBytecode->GetBody());
+
+    printf("JAL: Jump + linking by %d\n", offset);
+  };
+
+  operationHandlers[OP_RET] = [&](Context *context) {
+    // Return
+    context->Return();
+
+    printf("Return\n");
+  };
+
   operationHandlers[OP_EQ] = [&](Context *context) {
     float rValue = context->stack.Pop().GetNumber();
     float lValue = context->stack.Pop().GetNumber();
@@ -330,6 +348,11 @@ OperationDispatcher::OperationDispatcher()
     context->stack.Push(GValue(value ? false : true));
 
     printf("!%d = %d\n", value, value ? false : true);
+  };
+
+  operationHandlers[OP_STOP] = [&](Context *context) {
+    // Halts the context's execution
+    context->Halt();
   };
 
   // TODO:

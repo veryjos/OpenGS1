@@ -7,7 +7,8 @@ add_library(
         Bytecode.cpp                ../../include/gs1/vm/Bytecode.hpp
         GLibrary.cpp                ../../include/gs1/vm/GLibrary.hpp
         GStringFormatter.cpp        ../../include/gs1/vm/GStringFormatter.hpp
-        ../../include/gs1/vm/Stack.hpp
+                                    ../../include/gs1/vm/Stack.hpp
+                                    ../../include/gs1/vm/JumpStack.hpp
 )
 
 target_link_libraries(gs1vm gs1common gs1parse gs1compiler)

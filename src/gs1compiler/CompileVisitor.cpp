@@ -172,6 +172,16 @@ void CompileVisitor::Visit(StmtContinue *node)
   PrintLeaveNode();
 }
 
+void CompileVisitor::Visit(StmtReturn *node)
+{
+  PrintEnterNode(node, "StmtReturn");
+
+  // Emit return opcode
+  body.Emit(OP_RET);
+
+  PrintLeaveNode();
+}
+
 void CompileVisitor::Visit(StmtCommand *node)
 {
   PrintEnterNode(node, "StmtCommand");
@@ -200,7 +210,11 @@ void CompileVisitor::Visit(StmtFunctionDecl *node)
 
   Print("Function Decl found: %s", funcName.c_str());
 
+  body.BeginFunction(funcName);
+
   SyntaxTreeVisitor::Visit(node);
+
+  body.EndFunction();
 
   PrintLeaveNode();
 }

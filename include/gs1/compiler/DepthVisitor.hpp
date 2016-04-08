@@ -32,6 +32,8 @@ public:
 
   virtual void Visit(struct StmtContinue *node);
 
+  virtual void Visit(struct StmtReturn *node);
+
   virtual void Visit(struct StmtCommand *node);
 
   virtual void Visit(struct StmtFunctionDecl *node);

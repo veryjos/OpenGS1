@@ -35,6 +35,7 @@ private:
   Stmt *ParseStmtWhile();
   Stmt *ParseStmtBreak();
   Stmt *ParseStmtContinue();
+  Stmt *ParseStmtReturn();
   Stmt *ParseStmtCommand(const vector<bool> &prototype);
   Stmt *ParseStmtFunctionDecl();
 

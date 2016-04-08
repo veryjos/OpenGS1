@@ -9,7 +9,7 @@ using namespace gs1;
 
 Context::Context(Device *device, std::shared_ptr<GVarStore> primaryVarStore)
     : device(device), primaryVarStore(primaryVarStore), eventFlags(nullptr),
-      stringFormatter(new GStringFormatter())
+      stringFormatter(new GStringFormatter()), halted(false)
 {
 }
 
@@ -37,18 +37,13 @@ GValue Context::UnpackValue(const PackedValue &value,
 {
   switch (value.valueType) {
   case PACKVALUE_CONST_NUMBER:
-    return GValue(linkedBytecode[0]
-                      .GetBytecode()
-                      ->numberConstants.GetConstant(value.value)
-                      .val);
+    return GValue(
+        currentBytecode->numberConstants.GetConstant(value.value).val);
 
   case PACKVALUE_CONST_STRING: {
     GStringVariable *sv = new GStringVariable();
 
-    sv->string = linkedBytecode[0]
-                     .GetBytecode()
-                     ->stringConstants.GetConstant(value.value)
-                     .val;
+    sv->string = currentBytecode->stringConstants.GetConstant(value.value).val;
 
     return GValue((GVariable *)sv);
   }
@@ -56,10 +51,8 @@ GValue Context::UnpackValue(const PackedValue &value,
   case PACKVALUE_CONST_ARRAY: {
     GArrayVariable *array = new GArrayVariable();
 
-    uint32_t size = linkedBytecode[0]
-                        .GetBytecode()
-                        ->numberConstants.GetConstant(value.value)
-                        .val;
+    uint32_t size =
+        currentBytecode->numberConstants.GetConstant(value.value).val;
 
     array->values.resize(size);
 
@@ -70,10 +63,8 @@ GValue Context::UnpackValue(const PackedValue &value,
   }
 
   case PACKVALUE_NAMED: {
-    std::string varName = linkedBytecode[0]
-                              .GetBytecode()
-                              ->stringConstants.GetConstant(value.value)
-                              .val;
+    std::string varName =
+        currentBytecode->stringConstants.GetConstant(value.value).val;
 
     switch (unpackType) {
     case UNPACK_NUMBER:
@@ -233,6 +224,22 @@ void Context::CallFunction(const std::string &name)
   }
 }
 
+void Context::BranchAndLink(const uint32_t &offset)
+{
+  jumpStack.Push(currentBytecode->body - instructionPointer);
+
+  instructionPointer = currentBytecode->body + offset;
+}
+
+void Context::Return()
+{
+  if (jumpStack.Size() > 0) {
+    instructionPointer = currentBytecode->body + jumpStack.Pop();
+  } else {
+    Halt();
+  }
+}
+
 // TODO:
 // Clean this up..
 // This should be part of AST generation, perhaps
@@ -307,8 +314,10 @@ void Context::Run(GVarStore *eventFlags)
 
   // Run each linked bytecode
   for (auto &clb : linkedBytecode) {
-    const char *startPos = clb.GetBytecode()->GetBody();
-    unsigned int len = clb.GetBytecode()->GetBodyLen();
+    currentBytecode = clb.GetBytecode();
+
+    const char *startPos = currentBytecode->GetBody();
+    unsigned int len = currentBytecode->GetBodyLen();
 
     instructionPointer = startPos;
 
@@ -316,7 +325,14 @@ void Context::Run(GVarStore *eventFlags)
       const Opcode op = static_cast<const Opcode>(*instructionPointer);
       instructionPointer++;
 
-      operationDispatcher.Dispatch(this, *clb.GetBytecode(), op);
+      operationDispatcher.Dispatch(this, *currentBytecode, op);
+
+      if (halted) {
+        halted = false;
+        break;
+      }
     }
   }
 }
+
+void Context::Halt() { halted = true; }

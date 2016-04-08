@@ -6,6 +6,7 @@
 #include <gs1/vm/GLibrary.hpp>
 #include <gs1/vm/GStringFormatter.hpp>
 #include <gs1/vm/GVarStore.hpp>
+#include <gs1/vm/JumpStack.hpp>
 #include <gs1/vm/OperationDispatcher.hpp>
 #include <gs1/vm/Stack.hpp>
 
@@ -111,14 +112,29 @@ public:
   void CallCommand(const std::string &name);
   void CallFunction(const std::string &name);
 
+  void BranchAndLink(const uint32_t &offset);
+  void Return();
+
   void Eval(const std::string &code, const Stack &stack);
   void Run(GVarStore *eventFlags = nullptr);
 
+  void Halt();
+
+  // Stack used for operations
   Stack stack;
-  const char *instructionPointer;
 
 private:
+  // The bytecode currently being ran
+  std::shared_ptr<Bytecode> currentBytecode;
+
+  // Stack used for branching and linking
+  JumpStack jumpStack;
+
+  const char *instructionPointer;
+
   Device *device;
+
+  bool halted;
 
   std::shared_ptr<GVarStore> primaryVarStore;
 

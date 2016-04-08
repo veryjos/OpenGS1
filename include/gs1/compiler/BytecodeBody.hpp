@@ -54,6 +54,10 @@ public:
 
   void Emit(const PackedValue &value);
 
+  void BeginFunction(std::string name);
+
+  void EndFunction();
+
   Reservation Reserve(unsigned int numBytes);
 
   unsigned int GetCurrentPosition();
