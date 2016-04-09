@@ -86,7 +86,12 @@ struct StmtIf : public Stmt {
   Stmt *elseBody;
 };
 
-struct StmtFor : public Stmt {
+struct StmtLoop : public Stmt {
+  unsigned int breakPosition;
+  unsigned int continuePosition;
+};
+
+struct StmtFor : public StmtLoop {
   virtual void Accept(SyntaxTreeVisitor *v) { v->Visit(this); }
 
   virtual std::string GetType() const { return "StmtFor"; };
@@ -97,7 +102,7 @@ struct StmtFor : public Stmt {
   Stmt *body;
 };
 
-struct StmtWhile : public Stmt {
+struct StmtWhile : public StmtLoop {
   virtual void Accept(SyntaxTreeVisitor *v) { v->Visit(this); }
 
   virtual std::string GetType() const { return "StmtWhile"; };

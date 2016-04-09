@@ -121,6 +121,12 @@ void CompileVisitor::Visit(StmtFor *node)
   printf("PRINTING OFFSET JUMP %d TO: %d\n", failReservation.GetPosition(),
          body.GetCurrentPosition());
 
+  // Set "break" location
+  node->breakPosition = body.GetCurrentPosition();
+
+  // Set "continue" location
+  node->continuePosition = stepConditionPosition;
+
   PrintLeaveNode();
 }
 
@@ -151,6 +157,12 @@ void CompileVisitor::Visit(StmtWhile *node)
   printf("PRINTING OFFSET JUMP %d TO: %d\n", failReservation.GetPosition(),
          body.GetCurrentPosition());
 
+  // Set "break" location
+  node->breakPosition = body.GetCurrentPosition();
+
+  // Set "continue" location
+  node->continuePosition = conditionPosition;
+
   PrintLeaveNode();
 }
 
@@ -158,7 +170,24 @@ void CompileVisitor::Visit(StmtBreak *node)
 {
   PrintEnterNode(node, "StmtBreak");
 
-  SyntaxTreeVisitor::Visit(node);
+  // Iterate up tree until we find the parent loop
+  SyntaxNode* parent = node->parent;
+  while (parent != nullptr) {
+    if (parent->GetType() == "StmtWhile" || parent->GetType() == "StmtFor") {
+      // Emit jump out of bytecode to continue location
+
+      unsigned int breakPosition = ((StmtLoop*)parent)->continuePosition;
+
+      body.Emit(OP_JMP);
+      body.Emit(body.GetCurrentPosition() - breakPosition);
+      printf("BREAK: PRINTING OFFSET JUMP %d TO: %d\n",
+             body.GetCurrentPosition(), breakPosition);
+
+      break;
+    }
+
+    parent = parent->parent;
+  }
 
   PrintLeaveNode();
 }
@@ -167,7 +196,24 @@ void CompileVisitor::Visit(StmtContinue *node)
 {
   PrintEnterNode(node, "StmtContinue");
 
-  SyntaxTreeVisitor::Visit(node);
+  // Iterate up tree until we find the parent loop
+  SyntaxNode* parent = node->parent;
+  while (parent != nullptr) {
+    if (parent->GetType() == "StmtWhile" || parent->GetType() == "StmtFor") {
+      // Emit jump out of bytecode to continue location
+
+      unsigned int continuePosition = ((StmtLoop*)parent)->continuePosition;
+
+      body.Emit(OP_JMP);
+      body.Emit(body.GetCurrentPosition() - continuePosition);
+      printf("CONTINUE: PRINTING OFFSET JUMP %d TO: %d\n",
+             body.GetCurrentPosition(), continuePosition);
+
+      break;
+    }
+
+    parent = parent->parent;
+  }
 
   PrintLeaveNode();
 }
