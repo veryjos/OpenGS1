@@ -49,18 +49,19 @@ OperationDispatcher::OperationDispatcher()
 
     case GVALUETYPE_GVARIABLE:
       switch (rValue.GetVariable()->GetVarType()) {
-        case GVARTYPE_ARRAY:
-          context->SetVariable(varName, GVARTYPE_ARRAY, rValue);
+      case GVARTYPE_ARRAY:
+        context->SetVariable(varName, GVARTYPE_ARRAY, rValue);
 
-          printf("%s = Array: size %u\n", varName.c_str(),
-                 (uint32_t) ((GArrayVariable *) rValue.GetVariable())->values.size());
-          break;
+        printf(
+            "%s = Array: size %u\n", varName.c_str(),
+            (uint32_t)((GArrayVariable *)rValue.GetVariable())->values.size());
+        break;
 
-        case GVARTYPE_NUMBER:
-          context->SetVariable(varName, GVARTYPE_NUMBER, rValue);
+      case GVARTYPE_NUMBER:
+        context->SetVariable(varName, GVARTYPE_NUMBER, rValue);
 
-          printf("%s = Number: %f\n", varName.c_str(), rValue.GetNumber());
-          break;
+        printf("%s = Number: %f\n", varName.c_str(), rValue.GetNumber());
+        break;
       }
       break;
     }

@@ -11,6 +11,11 @@ enum PackedValueType {
 };
 
 // FIXME: Don't rely on bitpacking..
+
+#ifdef _MSC_VER
+#pragma pack(push, 1)
+#endif
+
 struct PackedValue {
   PackedValue(PackedValueType valueType, unsigned int index = 0)
       : valueType(valueType), value(index){};
@@ -19,7 +24,12 @@ struct PackedValue {
   unsigned int valueType : 4;
   unsigned int value : 16;
   unsigned int unused : 12;
-} __attribute__((packed));
+}
+#ifndef _MSC_VER
+__attribute__((packed));
+#else
+#pragma pack(push, 0)
+#endif
 
 // FIXME: Deserialize properly. For the sake of testing/iterating quickly, do it
 // lazy.

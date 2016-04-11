@@ -171,12 +171,12 @@ void CompileVisitor::Visit(StmtBreak *node)
   PrintEnterNode(node, "StmtBreak");
 
   // Iterate up tree until we find the parent loop
-  SyntaxNode* parent = node->parent;
+  SyntaxNode *parent = node->parent;
   while (parent != nullptr) {
     if (parent->GetType() == "StmtWhile" || parent->GetType() == "StmtFor") {
       // Emit jump out of bytecode to continue location
 
-      unsigned int breakPosition = ((StmtLoop*)parent)->continuePosition;
+      unsigned int breakPosition = ((StmtLoop *)parent)->continuePosition;
 
       body.Emit(OP_JMP);
       body.Emit(body.GetCurrentPosition() - breakPosition);
@@ -197,12 +197,12 @@ void CompileVisitor::Visit(StmtContinue *node)
   PrintEnterNode(node, "StmtContinue");
 
   // Iterate up tree until we find the parent loop
-  SyntaxNode* parent = node->parent;
+  SyntaxNode *parent = node->parent;
   while (parent != nullptr) {
     if (parent->GetType() == "StmtWhile" || parent->GetType() == "StmtFor") {
       // Emit jump out of bytecode to continue location
 
-      unsigned int continuePosition = ((StmtLoop*)parent)->continuePosition;
+      unsigned int continuePosition = ((StmtLoop *)parent)->continuePosition;
 
       body.Emit(OP_JMP);
       body.Emit(body.GetCurrentPosition() - continuePosition);
