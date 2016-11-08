@@ -19,6 +19,11 @@ include_directories(include)
 
 add_subdirectory(src/gs1common)
 add_subdirectory(src/gs1parse)
-add_subdirectory(src/gs1test)
 add_subdirectory(src/gs1compiler)
 add_subdirectory(src/gs1vm)
+
+if(EMSCRIPTEN)
+  add_subdirectory(emscripten/gs1webconsole)
+else()
+  add_subdirectory(src/gs1test)
+endif()
