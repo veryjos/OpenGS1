@@ -1,4 +1,5 @@
 #include <gs1/common/ByteBuffer.hpp>
+#include <gs1/common/Util.hpp>
 
 #include <stdlib.h>
 #include <string.h>
@@ -73,7 +74,7 @@ void ByteBuffer::Write16(const int16_t &value, int32_t offset)
 #ifdef _MSC_VER
     int16_t swap = _byteswap_ushort(value);
 #else
-    int16_t swap = __bswap_16(value);
+    int16_t swap = bswap_16(value);
 #endif
 
     Write8(((char *)&swap)[0], offset);
@@ -90,7 +91,7 @@ void ByteBuffer::WriteU16(const uint16_t &value, int32_t offset)
 #ifdef _MSC_VER
     int16_t swap = _byteswap_ushort(value);
 #else
-    int16_t swap = __bswap_16(value);
+    int16_t swap = bswap_16(value);
 #endif
 
     WriteU8(((unsigned char *)&swap)[0], offset);
@@ -107,7 +108,7 @@ void ByteBuffer::Write32(const int32_t &value, int32_t offset)
 #ifdef _MSC_VER
     int16_t swap = _byteswap_ulong(value);
 #else
-    int16_t swap = __bswap_32(value);
+    int16_t swap = bswap_32(value);
 #endif
 
     Write8(((char *)&swap)[0], offset);
@@ -128,7 +129,7 @@ void ByteBuffer::WriteU32(const uint32_t &value, int32_t offset)
 #ifdef _MSC_VER
     int16_t swap = _byteswap_ulong(value);
 #else
-    int16_t swap = __bswap_32(value);
+    int16_t swap = bswap_32(value);
 #endif
 
     WriteU8(((unsigned char *)&swap)[0], offset);

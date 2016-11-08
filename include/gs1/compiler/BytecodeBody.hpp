@@ -15,13 +15,19 @@ struct Reservation {
 
   ~Reservation(){};
 
-  Reservation &Emit(Opcode op) { byteBuffer->Write8(op, offset++); };
+  Reservation &Emit(Opcode op)
+  {
+    byteBuffer->Write8(op, offset++);
+    return *this;
+  };
 
   Reservation &Emit(int constant)
   {
     byteBuffer->Write32(constant, offset);
 
     offset += 4;
+
+    return *this;
   };
 
   Reservation &Emit(unsigned int constant)
@@ -29,6 +35,8 @@ struct Reservation {
     byteBuffer->WriteU32(constant, offset);
 
     offset += 4;
+
+    return *this;
   };
 
   unsigned int GetPosition() { return offset; }

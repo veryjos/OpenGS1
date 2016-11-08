@@ -1,6 +1,9 @@
 #ifndef GS1COMMON_BUFFERREADER_HPP
 #define GS1COMMON_BUFFERREADER_HPP
 
+#include <gs1/common/Util.hpp>
+
+#include "Log.hpp"
 #include <string>
 
 namespace gs1
@@ -9,21 +12,96 @@ class BufferReader
 {
 public:
   BufferReader(const char *data, uint32_t len)
-      : data(data), len(len), readPos(0){};
-
-  template <typename T> bool Read(T &value) { return _Read(value); };
-
-  template <typename T> bool ReadAsBytes(T *value)
+      : data(data), len(len), readPos(0)
   {
-    if (readPos + sizeof(T) > len)
-      return false;
-
-    value = (T *)&data[readPos];
-
-    readPos += sizeof(T);
-
-    return true;
+    // Check machine endianness
+    char swapTest[2] = {1, 0};
+    if (*(short *)swapTest == 1)
+      isBigEndian = false;
+    else
+      isBigEndian = true;
   };
+
+  int8_t Read8() { return data[readPos++]; };
+
+  uint8_t ReadU8() { return data[readPos++]; };
+
+  int16_t Read16()
+  {
+    char _value[4] = {data[readPos], data[readPos + 1]};
+    int16_t value = *((int16_t *)&_value);
+
+    if (isBigEndian)
+      value = bswap_16(value);
+
+    readPos += 2;
+
+    return value;
+  };
+
+  uint16_t ReadU16()
+  {
+    char _value[4] = {data[readPos], data[readPos + 1]};
+    uint16_t value = *((uint16_t *)&_value);
+
+    if (isBigEndian)
+      value = bswap_16(value);
+
+    readPos += 2;
+
+    return value;
+  };
+
+  int32_t Read32()
+  {
+    char _value[4] = {data[readPos], data[readPos + 1], data[readPos + 2],
+                      data[readPos + 3]};
+    int32_t value = *((int32_t *)&_value);
+
+    if (isBigEndian)
+      value = bswap_32(value);
+
+    readPos += 4;
+
+    return value;
+  };
+
+  uint32_t ReadU32()
+  {
+    char _value[4] = {data[readPos], data[readPos + 1], data[readPos + 2],
+                      data[readPos + 3]};
+    uint32_t value = *((uint32_t *)&_value);
+
+    if (isBigEndian)
+      value = bswap_32(value);
+
+    readPos += 4;
+
+    return value;
+  };
+
+  float ReadFloat()
+  {
+    char _value[4] = {data[readPos], data[readPos + 1], data[readPos + 2],
+                      data[readPos + 3]};
+    float value = *((float *)&_value);
+
+    readPos += 4;
+
+    return value;
+  }
+
+  std::string ReadString()
+  {
+    std::string output;
+
+    uint32_t length = ReadU32();
+
+    for (uint32_t i = 0; i < length; ++i)
+      output += (char)ReadU8();
+
+    return output;
+  }
 
   bool Skip(uint32_t size)
   {
@@ -38,36 +116,9 @@ public:
   void Seek(uint32_t pos) { readPos = pos; };
 
 private:
+  bool isBigEndian;
+
   const char *data;
-
-  template <typename T> bool _Read(T &value)
-  {
-    if (readPos + sizeof(T) > len)
-      return false;
-
-    value = *reinterpret_cast<const T *>(&data[readPos]);
-
-    readPos += sizeof(T);
-
-    return true;
-  };
-
-  bool _Read(std::string &value)
-  {
-    uint32_t length;
-    if (!Read(length))
-      return false;
-
-    char next;
-    for (uint32_t i = 0; i < length; i++) {
-      if (!Read(next))
-        return false;
-
-      value += next;
-    }
-
-    return true;
-  };
 
   uint32_t len;
   uint32_t readPos;
