@@ -84,6 +84,8 @@ bool GValue::GetFlag() const
       return false;
     }
   }
+
+  return false;
 };
 
 std::string GValue::GetString() const

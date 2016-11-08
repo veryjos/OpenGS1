@@ -80,5 +80,8 @@ void GVarStore::SetValue(const std::string &name, const GVarType type,
     bank->variables[name] = copy;
     break;
   }
+
+  default:
+    break;
   }
 }

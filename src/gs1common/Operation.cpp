@@ -95,6 +95,9 @@ std::string gs1::OpcodeToString(Opcode opcode)
 
   case OP_DBG_OUT:
     return "OP_DBG_OUT";
+
+  default:
+    return "";
   }
 
   return "Unknown opcode";
