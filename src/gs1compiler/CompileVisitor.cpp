@@ -1,6 +1,9 @@
+#include <cstdarg>
+
+#include <gs1/common/Log.hpp>
 #include <gs1/compiler/CompileVisitor.hpp>
 
-#include <cstdarg>
+#include <gs1/parse/SyntaxTreeVisitor.hpp>
 
 using namespace gs1;
 
@@ -12,9 +15,10 @@ CompileVisitor::CompileVisitor(ISource &source, bool printTerminals)
 void CompileVisitor::Visit(SyntaxTerminal *node)
 {
   if (printTerminals) {
-    printf("%*s", level, "");
-    printf("* %s(%s)\n", GetTokenTypeName(node->token.type),
-           node->token.text.c_str());
+    Log::Get().Print(LOGLEVEL_VERBOSE, "%*s", level, "");
+    Log::Get().Print(LOGLEVEL_VERBOSE, "* %s(%s)\n",
+                     GetTokenTypeName(node->token.type),
+                     node->token.text.c_str());
   }
 }
 
@@ -66,8 +70,9 @@ void CompileVisitor::Visit(StmtIf *node)
     // Write the offset to jump past the if-body (and into the else body)
     offsetReservation.Emit(body.GetCurrentPosition() -
                            offsetReservation.GetPosition());
-    printf("PRINTING OFFSET JUMP %d TO: %d\n", offsetReservation.GetPosition(),
-           body.GetCurrentPosition());
+    Log::Get().Print(LOGLEVEL_VERBOSE, "PRINTING OFFSET JUMP %d TO: %d\n",
+                     offsetReservation.GetPosition(),
+                     body.GetCurrentPosition());
 
     // Write the else body
     node->elseBody->Accept(this);
@@ -75,14 +80,16 @@ void CompileVisitor::Visit(StmtIf *node)
     // Fill the reservation for our jump to skip the else
     elseOffsetReservation.Emit(body.GetCurrentPosition() -
                                elseOffsetReservation.GetPosition());
-    printf("PRINTING ELSE OFFSET JUMP %d TO: %d\n",
-           elseOffsetReservation.GetPosition(), body.GetCurrentPosition());
+    Log::Get().Print(LOGLEVEL_VERBOSE, "PRINTING ELSE OFFSET JUMP %d TO: %d\n",
+                     elseOffsetReservation.GetPosition(),
+                     body.GetCurrentPosition());
   } else {
     // Write the offset to jump past the if-body
     offsetReservation.Emit(body.GetCurrentPosition() -
                            offsetReservation.GetPosition());
-    printf("PRINTING OFFSET JUMP %d TO: %d\n", offsetReservation.GetPosition(),
-           body.GetCurrentPosition());
+    Log::Get().Print(LOGLEVEL_VERBOSE, "PRINTING OFFSET JUMP %d TO: %d\n",
+                     offsetReservation.GetPosition(),
+                     body.GetCurrentPosition());
   }
 
   PrintLeaveNode();
@@ -113,13 +120,13 @@ void CompileVisitor::Visit(StmtFor *node)
   // Jump back to step condition
   body.Emit(OP_JMP);
   body.Emit(stepConditionPosition - body.GetCurrentPosition());
-  printf("PRINTING OFFSET JUMP %d TO: %d\n", body.GetCurrentPosition(),
-         stepConditionPosition);
+  Log::Get().Print(LOGLEVEL_VERBOSE, "PRINTING OFFSET JUMP %d TO: %d\n",
+                   body.GetCurrentPosition(), stepConditionPosition);
 
   failReservation.Emit(body.GetCurrentPosition() -
                        failReservation.GetPosition());
-  printf("PRINTING OFFSET JUMP %d TO: %d\n", failReservation.GetPosition(),
-         body.GetCurrentPosition());
+  Log::Get().Print(LOGLEVEL_VERBOSE, "PRINTING OFFSET JUMP %d TO: %d\n",
+                   failReservation.GetPosition(), body.GetCurrentPosition());
 
   // Set "break" location
   node->breakPosition = body.GetCurrentPosition();
@@ -149,13 +156,13 @@ void CompileVisitor::Visit(StmtWhile *node)
   // Jump back to condition check
   body.Emit(OP_JMP);
   body.Emit(conditionPosition - body.GetCurrentPosition());
-  printf("PRINTING OFFSET JUMP %d TO: %d\n", body.GetCurrentPosition(),
-         conditionPosition);
+  Log::Get().Print(LOGLEVEL_VERBOSE, "PRINTING OFFSET JUMP %d TO: %d\n",
+                   body.GetCurrentPosition(), conditionPosition);
 
   failReservation.Emit(body.GetCurrentPosition() -
                        failReservation.GetPosition());
-  printf("PRINTING OFFSET JUMP %d TO: %d\n", failReservation.GetPosition(),
-         body.GetCurrentPosition());
+  Log::Get().Print(LOGLEVEL_VERBOSE, "PRINTING OFFSET JUMP %d TO: %d\n",
+                   failReservation.GetPosition(), body.GetCurrentPosition());
 
   // Set "break" location
   node->breakPosition = body.GetCurrentPosition();
@@ -180,8 +187,9 @@ void CompileVisitor::Visit(StmtBreak *node)
 
       body.Emit(OP_JMP);
       body.Emit(body.GetCurrentPosition() - breakPosition);
-      printf("BREAK: PRINTING OFFSET JUMP %d TO: %d\n",
-             body.GetCurrentPosition(), breakPosition);
+      Log::Get().Print(LOGLEVEL_VERBOSE,
+                       "BREAK: PRINTING OFFSET JUMP %d TO: %d\n",
+                       body.GetCurrentPosition(), breakPosition);
 
       break;
     }
@@ -206,8 +214,9 @@ void CompileVisitor::Visit(StmtContinue *node)
 
       body.Emit(OP_JMP);
       body.Emit(body.GetCurrentPosition() - continuePosition);
-      printf("CONTINUE: PRINTING OFFSET JUMP %d TO: %d\n",
-             body.GetCurrentPosition(), continuePosition);
+      Log::Get().Print(LOGLEVEL_VERBOSE,
+                       "CONTINUE: PRINTING OFFSET JUMP %d TO: %d\n",
+                       body.GetCurrentPosition(), continuePosition);
 
       break;
     }
@@ -383,6 +392,9 @@ void CompileVisitor::Visit(ExprUnaryOp *node)
     case TokOpDecrement:
       body.Emit(OP_DECPUSH);
       break;
+
+    default:
+      break;
     }
   } else {
     switch (node->op->token.type) {
@@ -392,6 +404,9 @@ void CompileVisitor::Visit(ExprUnaryOp *node)
 
     case TokOpDecrement:
       body.Emit(OP_DEC);
+      break;
+
+    default:
       break;
     }
   }
@@ -433,13 +448,15 @@ void CompileVisitor::Visit(ExprBinaryOp *node)
       // This is where we jump if it's false
       leftFailReservation.Emit(body.GetCurrentPosition() -
                                leftFailReservation.GetPosition());
-      printf("PRINTING OFFSET JUMP %d TO: %d\n",
-             leftFailReservation.GetPosition(), body.GetCurrentPosition());
+      Log::Get().Print(LOGLEVEL_VERBOSE, "PRINTING OFFSET JUMP %d TO: %d\n",
+                       leftFailReservation.GetPosition(),
+                       body.GetCurrentPosition());
 
       rightFailReservation.Emit(body.GetCurrentPosition() -
                                 rightFailReservation.GetPosition());
-      printf("PRINTING OFFSET FJUMP %d TO: %d\n",
-             rightFailReservation.GetPosition(), body.GetCurrentPosition());
+      Log::Get().Print(LOGLEVEL_VERBOSE, "PRINTING OFFSET FJUMP %d TO: %d\n",
+                       rightFailReservation.GetPosition(),
+                       body.GetCurrentPosition());
 
       // Push a zero, this is the failure block
       body.Emit(OP_PUSH);
@@ -448,8 +465,9 @@ void CompileVisitor::Visit(ExprBinaryOp *node)
 
       successReservation.Emit(body.GetCurrentPosition() -
                               successReservation.GetPosition());
-      printf("PRINTING OFFSET SJUMP %d TO: %d\n",
-             successReservation.GetPosition(), body.GetCurrentPosition());
+      Log::Get().Print(LOGLEVEL_VERBOSE, "PRINTING OFFSET SJUMP %d TO: %d\n",
+                       successReservation.GetPosition(),
+                       body.GetCurrentPosition());
     } else if (node->op->token.type == TokOpOr) {
       // If "or", evaluate this condition and early-IN (short-circuit) if true
       // Write a jump at the end of the left-hand condition
@@ -468,14 +486,16 @@ void CompileVisitor::Visit(ExprBinaryOp *node)
       // Fill the early-in reservation
       leftJumpReservation.Emit(body.GetCurrentPosition() -
                                leftJumpReservation.GetPosition());
-      printf("PRINTING OFFSET JUMP %d TO: %d\n",
-             leftJumpReservation.GetPosition(), body.GetCurrentPosition());
+      Log::Get().Print(LOGLEVEL_VERBOSE, "PRINTING OFFSET JUMP %d TO: %d\n",
+                       leftJumpReservation.GetPosition(),
+                       body.GetCurrentPosition());
 
       // This is where we jump to if the right-hand pass-through failed
       rightJumpReservation.Emit(body.GetCurrentPosition() -
                                 rightJumpReservation.GetPosition());
-      printf("PRINTING OFFSET JUMP %d TO: %d\n",
-             rightJumpReservation.GetPosition(), body.GetCurrentPosition());
+      Log::Get().Print(LOGLEVEL_VERBOSE, "PRINTING OFFSET JUMP %d TO: %d\n",
+                       rightJumpReservation.GetPosition(),
+                       body.GetCurrentPosition());
 
       // Push a zero, this is the failure block
       body.Emit(0);
@@ -547,6 +567,9 @@ void CompileVisitor::Visit(ExprBinaryOp *node)
   case TokOpPow:
     body.Emit(OP_POW);
     break;
+
+  default:
+    break;
   }
 
   PrintLeaveNode();
@@ -576,8 +599,8 @@ void CompileVisitor::Visit(ExprTernaryOp *node)
   // Fill "fail" reservation
   failReservation.Emit(body.GetCurrentPosition() -
                        failReservation.GetPosition());
-  printf("PRINTING OFFSET JUMP %d TO: %d\n", failReservation.GetPosition(),
-         body.GetCurrentPosition());
+  Log::Get().Print(LOGLEVEL_VERBOSE, "PRINTING OFFSET JUMP %d TO: %d\n",
+                   failReservation.GetPosition(), body.GetCurrentPosition());
 
   // Write "else" body
   node->elseValue->Accept(this);
@@ -585,8 +608,8 @@ void CompileVisitor::Visit(ExprTernaryOp *node)
   // Set success jump to here
   successReservation.Emit(body.GetCurrentPosition() -
                           successReservation.GetPosition());
-  printf("PRINTING OFFSET JUMP %d TO: %d\n", successReservation.GetPosition(),
-         body.GetCurrentPosition());
+  Log::Get().Print(LOGLEVEL_VERBOSE, "PRINTING OFFSET JUMP %d TO: %d\n",
+                   successReservation.GetPosition(), body.GetCurrentPosition());
 
   PrintLeaveNode();
 }
@@ -662,8 +685,8 @@ void CompileVisitor::PrintEnterNode(SyntaxNode *node, const char *name)
     text += "...";
   }
 
-  printf("%*s", level, "");
-  printf("* %s(%s)\n", name, text.c_str());
+  Log::Get().Print(LOGLEVEL_VERBOSE, "%*s", level, "");
+  Log::Get().Print(LOGLEVEL_VERBOSE, "* %s(%s)\n", name, text.c_str());
 
   level += 2;
 }
@@ -678,8 +701,8 @@ void CompileVisitor::Print(const char *fmt, ...)
   vsnprintf(message, bufferSize, fmt, args);
   va_end(args);
 
-  printf("%*s", level, "");
-  printf("* %s\n", message);
+  Log::Get().Print(LOGLEVEL_VERBOSE, "%*s", level, "");
+  Log::Get().Print(LOGLEVEL_VERBOSE, "* %s\n", message);
 }
 
 void CompileVisitor::PrintLeaveNode() { level -= 2; }

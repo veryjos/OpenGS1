@@ -209,7 +209,7 @@ void Lexer::HandleNumberLiteral()
       NextChar();
     } while (ch == '.' || IsDecDigit(ch));
 
-    if (hasDot && ch == 'e' || ch == 'E') {
+    if ((hasDot && ch == 'e') || ch == 'E') {
       NextChar();
 
       if (ch == '+' || ch == '-') {

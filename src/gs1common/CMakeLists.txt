@@ -8,4 +8,5 @@ add_library(
         ByteBuffer.cpp        ../../include/gs1/common/ByteBuffer.hpp
                               ../../include/gs1/common/BufferReader.hpp
         Operation.cpp         ../../include/gs1/common/Operation.hpp
+        Log.cpp               ../../include/gs1/common/Log.hpp
 )

@@ -11,16 +11,16 @@ void observer(const Diag &d)
 {
   switch (d.severity) {
   case Diag::Info:
-    printf("info: %d@%d: %s\n", d.pos.line + 1, d.pos.offset,
-           d.message.c_str());
+    Log::Get().Print(LOGLEVEL_INFO, "info: %d@%d: %s\n", d.pos.line + 1,
+                     d.pos.offset, d.message.c_str());
     break;
   case Diag::Warning:
-    printf("warning: %d@%d: %s\n", d.pos.line + 1, d.pos.offset,
-           d.message.c_str());
+    Log::Get().Print(LOGLEVEL_WARNING, "warning: %d@%d: %s\n", d.pos.line + 1,
+                     d.pos.offset, d.message.c_str());
     break;
   case Diag::Error:
-    printf("error: %d@%d: %s\n", d.pos.line + 1, d.pos.offset,
-           d.message.c_str());
+    Log::Get().Print(LOGLEVEL_ERROR, "error: %d@%d: %s\n", d.pos.line + 1,
+                     d.pos.offset, d.message.c_str());
     break;
   }
 }

@@ -24,8 +24,8 @@ public:
       std::string propValue = context->stack.Pop().GetString();
       std::string propName = context->stack.Pop().GetString();
 
-      printf("Setting player prop %s = %s\n", propName.c_str(),
-             propValue.c_str());
+      Log::Get().Print(LOGLEVEL_VERBOSE, "Setting player prop %s = %s\n",
+                       propName.c_str(), propValue.c_str());
     });
   };
 

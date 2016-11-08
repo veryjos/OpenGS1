@@ -1,3 +1,4 @@
+#include <gs1/common/Log.hpp>
 #include <gs1/vm/Context.hpp>
 
 using namespace gs1;
@@ -5,6 +6,13 @@ using namespace gs1;
 static Bytecode *bytecode;
 static bool g_initialized = false;
 static std::function<void(Context *context)> operationHandlers[OP_NUM_OPS];
+
+static inline int32_t readOffset(const char *data)
+{
+  char value[4] = {data[0], data[1], data[2], data[3]};
+
+  return *((int32_t *)&value);
+}
 
 OperationDispatcher::OperationDispatcher()
 {
@@ -21,12 +29,14 @@ OperationDispatcher::OperationDispatcher()
     context->stack.Push(lValue);
 
     if (lValue.GetValueType() == GVALUETYPE_NUMBER)
-      printf("push %f\n", lValue.GetNumber());
+      Log::Get().Print(LOGLEVEL_VERBOSE, "push %f\n", lValue.GetNumber());
     else if (lValue.GetValueType() == GVALUETYPE_FLAG)
-      printf("push %s\n", lValue.GetFlag() ? "true" : " false");
+      Log::Get().Print(LOGLEVEL_VERBOSE, "push %s\n",
+                       lValue.GetFlag() ? "true" : " false");
     else if (lValue.GetValueType() == GVALUETYPE_GVARIABLE)
-      printf("push %s : %s\n", lValue.GetVariable()->name.c_str(),
-             lValue.GetVariable()->DebugString().c_str());
+      Log::Get().Print(LOGLEVEL_VERBOSE, "push %s : %s\n",
+                       lValue.GetVariable()->name.c_str(),
+                       lValue.GetVariable()->DebugString().c_str());
   };
 
   operationHandlers[OP_ASSIGN] = [&](Context *context) {
@@ -37,14 +47,15 @@ OperationDispatcher::OperationDispatcher()
     case GVALUETYPE_NUMBER:
       context->SetVariable(varName, GVARTYPE_NUMBER, rValue);
 
-      printf("%s = Number: %f\n", varName.c_str(), rValue.GetNumber());
+      Log::Get().Print(LOGLEVEL_VERBOSE, "%s = Number: %f\n", varName.c_str(),
+                       rValue.GetNumber());
       break;
 
     case GVALUETYPE_FLAG:
       context->SetVariable(varName, GVARTYPE_FLAG, rValue);
 
-      printf("%s = Bool: %s\n", varName.c_str(),
-             rValue.GetFlag() ? "true" : "false");
+      Log::Get().Print(LOGLEVEL_VERBOSE, "%s = Bool: %s\n", varName.c_str(),
+                       rValue.GetFlag() ? "true" : "false");
       break;
 
     case GVALUETYPE_GVARIABLE:
@@ -52,17 +63,24 @@ OperationDispatcher::OperationDispatcher()
       case GVARTYPE_ARRAY:
         context->SetVariable(varName, GVARTYPE_ARRAY, rValue);
 
-        printf(
-            "%s = Array: size %u\n", varName.c_str(),
+        Log::Get().Print(
+            LOGLEVEL_VERBOSE, "%s = Array: size %u\n", varName.c_str(),
             (uint32_t)((GArrayVariable *)rValue.GetVariable())->values.size());
         break;
 
       case GVARTYPE_NUMBER:
         context->SetVariable(varName, GVARTYPE_NUMBER, rValue);
 
-        printf("%s = Number: %f\n", varName.c_str(), rValue.GetNumber());
+        Log::Get().Print(LOGLEVEL_VERBOSE, "%s = Number: %f\n", varName.c_str(),
+                         rValue.GetNumber());
+        break;
+
+      default:
         break;
       }
+      break;
+
+    default:
       break;
     }
   };
@@ -76,20 +94,22 @@ OperationDispatcher::OperationDispatcher()
         (GArrayVariable *)context->GetVariable(arrName, GVARTYPE_ARRAY);
     array->values[(uint32_t)index.GetNumber()] = rValue.GetNumber();
 
-    printf("Array set: %s[%u] = %f\n", arrName.c_str(),
-           (uint32_t)index.GetNumber(), rValue.GetNumber());
+    Log::Get().Print(LOGLEVEL_VERBOSE, "Array set: %s[%u] = %f\n",
+                     arrName.c_str(), (uint32_t)index.GetNumber(),
+                     rValue.GetNumber());
   };
 
   operationHandlers[OP_ARR_GET] = [&](Context *context) {
     GValue index = context->stack.Pop();
     std::string arrName = context->stack.Pop().GetVariable()->name;
 
-    GValue array = context->GetVariableValue(arrName, GVARTYPE_ARRAY);
-    GValue value = ((GArrayVariable *)array.GetVariable())
-                       ->values[(uint32_t)index.GetNumber()];
+    GArrayVariable *array =
+        (GArrayVariable *)context->GetVariable(arrName, GVARTYPE_ARRAY);
+    GValue value = array->values[(uint32_t)index.GetNumber()];
 
-    printf("Array lookup: %s[%u], Push %f\n", arrName.c_str(),
-           (uint32_t)index.GetNumber(), value.GetNumber());
+    Log::Get().Print(LOGLEVEL_VERBOSE, "Array lookup: %s[%u], Push %f\n",
+                     arrName.c_str(), (uint32_t)index.GetNumber(),
+                     value.GetNumber());
 
     context->stack.Push(value);
   };
@@ -101,7 +121,8 @@ OperationDispatcher::OperationDispatcher()
     // Add the two values and push the result
     context->stack.Push(GValue(lValue + rValue));
 
-    printf("%f + %f = %f\n", lValue, rValue, lValue + rValue);
+    Log::Get().Print(LOGLEVEL_VERBOSE, "%f + %f = %f\n", lValue, rValue,
+                     lValue + rValue);
   };
 
   operationHandlers[OP_SUB] = [&](Context *context) {
@@ -111,7 +132,8 @@ OperationDispatcher::OperationDispatcher()
     // Subtract the two values and push the result
     context->stack.Push(GValue(lValue - rValue));
 
-    printf("%f - %f = %f\n", lValue, rValue, lValue - rValue);
+    Log::Get().Print(LOGLEVEL_VERBOSE, "%f - %f = %f\n", lValue, rValue,
+                     lValue - rValue);
   };
 
   operationHandlers[OP_MUL] = [&](Context *context) {
@@ -121,7 +143,8 @@ OperationDispatcher::OperationDispatcher()
     // Multiply the two values and push the result
     context->stack.Push(GValue(lValue * rValue));
 
-    printf("%f * %f = %f\n", lValue, rValue, lValue * rValue);
+    Log::Get().Print(LOGLEVEL_VERBOSE, "%f * %f = %f\n", lValue, rValue,
+                     lValue * rValue);
   };
 
   operationHandlers[OP_DIV] = [&](Context *context) {
@@ -131,7 +154,8 @@ OperationDispatcher::OperationDispatcher()
     // Multiply the two values and push the result
     context->stack.Push(GValue(lValue / rValue));
 
-    printf("%f / %f = %f\n", lValue, rValue, lValue / rValue);
+    Log::Get().Print(LOGLEVEL_VERBOSE, "%f / %f = %f\n", lValue, rValue,
+                     lValue / rValue);
   };
 
   operationHandlers[OP_MOD] = [&](Context *context) {
@@ -141,7 +165,8 @@ OperationDispatcher::OperationDispatcher()
     // Multiply the two values and push the result
     context->stack.Push(GValue(fmod(lValue, rValue)));
 
-    printf("%f %% %f = %f\n", lValue, rValue, fmod(lValue, rValue));
+    Log::Get().Print(LOGLEVEL_VERBOSE, "%f %% %f = %f\n", lValue, rValue,
+                     fmod(lValue, rValue));
   };
 
   operationHandlers[OP_POW] = [&](Context *context) {
@@ -151,7 +176,8 @@ OperationDispatcher::OperationDispatcher()
     // Multiply the two values and push the result
     context->stack.Push(GValue(powf(lValue, rValue)));
 
-    printf("%f ^ %f = %f\n", lValue, rValue, powf(lValue, rValue));
+    Log::Get().Print(LOGLEVEL_VERBOSE, "%f ^ %f = %f\n", lValue, rValue,
+                     powf(lValue, rValue));
   };
 
   operationHandlers[OP_INC] = [&](Context *context) {
@@ -162,7 +188,8 @@ OperationDispatcher::OperationDispatcher()
     // Increment the value on the varstore
     context->SetVariable(value.GetVariable()->name, GVARTYPE_NUMBER, value);
 
-    printf("%s++ = %f\n", value.GetVariable()->name.c_str(), value.GetNumber());
+    Log::Get().Print(LOGLEVEL_VERBOSE, "%s++ = %f\n",
+                     value.GetVariable()->name.c_str(), value.GetNumber());
   };
 
   operationHandlers[OP_INCPUSH] = [&](Context *context) {
@@ -176,8 +203,8 @@ OperationDispatcher::OperationDispatcher()
     // Increment the value on the varstore
     context->SetVariable(value.GetVariable()->name, GVARTYPE_NUMBER, value);
 
-    printf("%s++ = %f PUSH\n", value.GetVariable()->name.c_str(),
-           value.GetNumber());
+    Log::Get().Print(LOGLEVEL_VERBOSE, "%s++ = %f PUSH\n",
+                     value.GetVariable()->name.c_str(), value.GetNumber());
   };
 
   operationHandlers[OP_DEC] = [&](Context *context) {
@@ -189,7 +216,8 @@ OperationDispatcher::OperationDispatcher()
     context->SetVariable(value.GetVariable()->name.c_str(), GVARTYPE_NUMBER,
                          value);
 
-    printf("%s-- = %f\n", value.GetVariable()->name.c_str(), value.GetNumber());
+    Log::Get().Print(LOGLEVEL_VERBOSE, "%s-- = %f\n",
+                     value.GetVariable()->name.c_str(), value.GetNumber());
   };
 
   operationHandlers[OP_DECPUSH] = [&](Context *context) {
@@ -204,8 +232,8 @@ OperationDispatcher::OperationDispatcher()
     context->SetVariable(value.GetVariable()->name.c_str(), GVARTYPE_NUMBER,
                          value);
 
-    printf("%s-- = %f PUSH\n", value.GetVariable()->name.c_str(),
-           value.GetNumber());
+    Log::Get().Print(LOGLEVEL_VERBOSE, "%s-- = %f PUSH\n",
+                     value.GetVariable()->name.c_str(), value.GetNumber());
   };
 
   operationHandlers[OP_CALL] = [&](Context *context) {
@@ -218,7 +246,7 @@ OperationDispatcher::OperationDispatcher()
              .GetVariable())
             ->string;
 
-    printf("CMD_CALL: %s\n", commandName.c_str());
+    Log::Get().Print(LOGLEVEL_VERBOSE, "CMD_CALL: %s\n", commandName.c_str());
 
     context->CallFunction(commandName);
   };
@@ -233,37 +261,37 @@ OperationDispatcher::OperationDispatcher()
              .GetVariable())
             ->string;
 
-    printf("CMD_CALL: %s\n", commandName.c_str());
+    Log::Get().Print(LOGLEVEL_VERBOSE, "CMD_CALL: %s\n", commandName.c_str());
 
     context->CallCommand(commandName);
   };
 
   operationHandlers[OP_JMP] = [&](Context *context) {
     // Get byte offset
-    int32_t offset = *(int32_t *)context->instructionPointer;
+    int32_t offset = readOffset(context->instructionPointer);
 
     // Jump to offset
     context->instructionPointer += offset;
 
-    printf("JMP: Jumping by %d\n", offset);
+    Log::Get().Print(LOGLEVEL_VERBOSE, "JMP: Jumping by %d\n", offset);
   };
 
   operationHandlers[OP_JAL] = [&](Context *context) {
     // Get byte offset
-    int32_t offset = *(int32_t *)context->instructionPointer;
+    int32_t offset = readOffset(context->instructionPointer);
 
     // Jump to offset and link
     context->BranchAndLink((context->instructionPointer + offset) -
                            context->currentBytecode->GetBody());
 
-    printf("JAL: Jump + linking by %d\n", offset);
+    Log::Get().Print(LOGLEVEL_VERBOSE, "JAL: Jump + linking by %d\n", offset);
   };
 
   operationHandlers[OP_RET] = [&](Context *context) {
     // Return
     context->Return();
 
-    printf("Return\n");
+    Log::Get().Print(LOGLEVEL_VERBOSE, "Return\n");
   };
 
   operationHandlers[OP_EQ] = [&](Context *context) {
@@ -273,7 +301,8 @@ OperationDispatcher::OperationDispatcher()
     // Multiply the two values and push the result
     context->stack.Push(GValue(lValue == rValue));
 
-    printf("%f == %f = %d\n", lValue, rValue, lValue == rValue);
+    Log::Get().Print(LOGLEVEL_VERBOSE, "%f == %f = %d\n", lValue, rValue,
+                     lValue == rValue);
   };
 
   operationHandlers[OP_LT] = [&](Context *context) {
@@ -283,7 +312,8 @@ OperationDispatcher::OperationDispatcher()
     // Compare the two values and push the result
     context->stack.Push(GValue(lValue < rValue));
 
-    printf("%f < %f = %d\n", lValue, rValue, lValue < rValue);
+    Log::Get().Print(LOGLEVEL_VERBOSE, "%f < %f = %d\n", lValue, rValue,
+                     lValue < rValue);
   };
 
   operationHandlers[OP_GT] = [&](Context *context) {
@@ -293,7 +323,8 @@ OperationDispatcher::OperationDispatcher()
     // Compare the two values and push the result
     context->stack.Push(GValue(lValue > rValue));
 
-    printf("%f > %f = %d\n", lValue, rValue, lValue > rValue);
+    Log::Get().Print(LOGLEVEL_VERBOSE, "%f > %f = %d\n", lValue, rValue,
+                     lValue > rValue);
   };
 
   operationHandlers[OP_LTE] = [&](Context *context) {
@@ -303,7 +334,8 @@ OperationDispatcher::OperationDispatcher()
     // Multiply the two values and push the result
     context->stack.Push(GValue(lValue <= rValue));
 
-    printf("%f <= %f = %d\n", lValue, rValue, lValue <= rValue);
+    Log::Get().Print(LOGLEVEL_VERBOSE, "%f <= %f = %d\n", lValue, rValue,
+                     lValue <= rValue);
   };
 
   operationHandlers[OP_GTE] = [&](Context *context) {
@@ -313,22 +345,25 @@ OperationDispatcher::OperationDispatcher()
     // Multiply the two values and push the result
     context->stack.Push(GValue(lValue >= rValue));
 
-    printf("%f >= %f = %d\n", lValue, rValue, lValue >= rValue);
+    Log::Get().Print(LOGLEVEL_VERBOSE, "%f >= %f = %d\n", lValue, rValue,
+                     lValue >= rValue);
   };
 
   operationHandlers[OP_JEZ] = [&](Context *context) {
     bool value = context->stack.Pop().GetFlag();
 
     // Get byte offset
-    int32_t offset = *(int32_t *)context->instructionPointer;
+    int32_t offset = readOffset(context->instructionPointer);
 
     // Jump to offset
     if (!value) {
-      printf("JEZ: 0 == 0, Jumping by %d\n", offset);
+      Log::Get().Print(LOGLEVEL_VERBOSE, "JEZ: 0 == 0, Jumping by %d\n",
+                       offset);
 
       context->instructionPointer += offset;
     } else {
-      printf("JEZ: %d != 0, Ignoring jump by %d\n", value, offset);
+      Log::Get().Print(LOGLEVEL_VERBOSE, "JEZ: %d != 0, Ignoring jump by %d\n",
+                       value, offset);
 
       context->instructionPointer += sizeof(int32_t);
     }
@@ -338,15 +373,17 @@ OperationDispatcher::OperationDispatcher()
     bool value = context->stack.Pop().GetFlag();
 
     // Get byte offset
-    int32_t offset = *(int32_t *)context->instructionPointer;
+    int32_t offset = readOffset(context->instructionPointer);
 
     // Jump to offset
     if (value) {
-      printf("JNZ: 0 != 0, Jumping by %d\n", offset);
+      Log::Get().Print(LOGLEVEL_VERBOSE, "JNZ: 0 != 0, Jumping by %d\n",
+                       offset);
 
       context->instructionPointer += offset;
     } else {
-      printf("JNZ: %d == 0, Ignoring jump by %d\n", value, offset);
+      Log::Get().Print(LOGLEVEL_VERBOSE, "JNZ: %d == 0, Ignoring jump by %d\n",
+                       value, offset);
 
       context->instructionPointer += sizeof(int32_t);
     }
@@ -358,7 +395,8 @@ OperationDispatcher::OperationDispatcher()
     // Multiply the two values and push the result
     context->stack.Push(GValue(value ? false : true));
 
-    printf("!%d = %d\n", value, value ? false : true);
+    Log::Get().Print(LOGLEVEL_VERBOSE, "!%d = %d\n", value,
+                     value ? false : true);
   };
 
   operationHandlers[OP_STOP] = [&](Context *context) {

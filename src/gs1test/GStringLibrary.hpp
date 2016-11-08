@@ -15,7 +15,8 @@ public:
 
       context->SetVariable(strName, GVARTYPE_STRING, GStringVariable(strValue));
 
-      printf("setstring %s=%s\n", strName.c_str(), strValue.c_str());
+      Log::Get().Print(LOGLEVEL_VERBOSE, "setstring %s=%s\n", strName.c_str(),
+                       strValue.c_str());
     });
 
     RegisterCommand("addstring", [&](Context *context) {
@@ -30,13 +31,14 @@ public:
         context->SetVariable(strName, GVARTYPE_STRING,
                              GStringVariable(strValue));
 
-        printf("addstring %s=%s\n", strName.c_str(), strValue.c_str());
+        Log::Get().Print(LOGLEVEL_VERBOSE, "addstring %s=%s\n", strName.c_str(),
+                         strValue.c_str());
       } else {
         context->SetVariable(strName, GVARTYPE_STRING,
                              GStringVariable(strVariable->string + strValue));
 
-        printf("addstring %s=%s\n", strName.c_str(),
-               (strVariable->string + strValue).c_str());
+        Log::Get().Print(LOGLEVEL_VERBOSE, "addstring %s=%s\n", strName.c_str(),
+                         (strVariable->string + strValue).c_str());
       }
     });
 

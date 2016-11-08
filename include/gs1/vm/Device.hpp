@@ -2,6 +2,7 @@
 #define GS1VM_DEVICE_HPP
 
 #include <gs1/common/ByteBuffer.hpp>
+#include <gs1/common/Log.hpp>
 #include <gs1/parse/Parser.hpp>
 #include <gs1/vm/Context.hpp>
 

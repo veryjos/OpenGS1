@@ -2,8 +2,10 @@
 #include <gs1/parse/Parser.hpp>
 
 #include <gs1/vm/Device.hpp>
+#include <regex>
 
 #include "GFlagLibrary.hpp"
+#include "GOutputLibrary.hpp"
 #include "GStringLibrary.hpp"
 
 using namespace gs1;
@@ -11,33 +13,50 @@ using namespace gs1;
 int main(int argc, const char *argv[])
 {
   // Prototypes for commands/functions are necessary for correct parsing
-  PrototypeMap cmds = {
-      {"setarray", {false, false}},
-      {"freezeplayer", {false}},
-      {"hideplayer", {false}},
-      {"addstring", {false, true}},
-      {"showimg", {false, true, false, false}},
-      {"changeimgcolors", {false, false, false, false, false}},
-      {"addstring", {false, true}},
-      {"hideimg", {false}},
-      {"showtext", {false, false, false, true, true, true}},
-      {"play", {true}},
-      {"stopmidi", {}},
-      {"changeimgvis", {false, false}},
-      {"debug", {false}},
-      {"debugstr", {true}},
-      {"setplayerprop", {true, true}},
+  PrototypeMap cmds = {{"setarray", {false, false}},
+                       {"freezeplayer", {false}},
+                       {"hideplayer", {false}},
+                       {"addstring", {false, true}},
+                       {"showimg", {false, true, false, false}},
+                       {"changeimgcolors", {false, false, false, false, false}},
+                       {"addstring", {false, true}},
+                       {"hideimg", {false}},
+                       {"showtext", {false, false, false, true, true, true}},
+                       {"play", {true}},
+                       {"stopmidi", {}},
+                       {"changeimgvis", {false, false}},
+                       {"debug", {false}},
+                       {"debugstr", {true}},
+                       {"setplayerprop", {true, true}},
 
-      {"set", {true}},
-      {"unset", {true}},
+                       {"set", {true}},
+                       {"unset", {true}},
 
-      {"setstring", {true, true}},
-      {"addstring", {true, true}},
-  };
+                       {"setstring", {true, true}},
+                       {"addstring", {true, true}},
+
+                       {"message", {true}},
+                       {"print", {true}}};
 
   PrototypeMap funcs = {
       {"strtofloat", {true}},
   };
+
+  Log::Get().SetLogCallback([&](LogLevel logLevel, char *message) {
+    std::string msg = message;
+    msg.erase(std::remove(msg.begin(), msg.end(), '\n'), msg.end());
+    msg.erase(std::remove(msg.begin(), msg.end(), '\''), msg.end());
+
+    char cmd[4096] = "console.log('";
+    strcat(cmd, msg.c_str());
+    strcat(cmd, "');");
+
+    switch (logLevel) {
+    default:
+      printf("%s\n", cmd);
+      break;
+    }
+  });
 
   try {
     const char *path;
@@ -73,6 +92,10 @@ int main(int argc, const char *argv[])
     // Load and link the string library (setstring, addstring..)
     auto stringLibrary = device.LoadLibrary<GStringLibrary>();
     context->LinkLibrary(stringLibrary);
+
+    // Load and link the output library (message, print)
+    auto outputLibrary = device.LoadLibrary<GOutputLibrary>();
+    context->LinkLibrary(outputLibrary);
 
     // Set event flags for running the context
     GVarStore eventflags;

@@ -2,6 +2,7 @@
 #include <gs1/common/PackedValue.hpp>
 #include <gs1/compiler/BytecodeBody.hpp>
 
+#include <gs1/common/Log.hpp>
 #include <stdio.h>
 
 using namespace gs1;
@@ -12,22 +13,24 @@ BytecodeBody::~BytecodeBody(){};
 
 void BytecodeBody::Emit(Opcode op)
 {
-  printf("%5d EMIT OPER: %s\n", byteBuffer.GetLength(),
-         OpcodeToString(op).c_str());
+  Log::Get().Print(LOGLEVEL_VERBOSE, "%5d EMIT OPER: %s\n",
+                   byteBuffer.GetLength(), OpcodeToString(op).c_str());
 
   byteBuffer.WriteU8(op);
 }
 
 void BytecodeBody::Emit(int constant)
 {
-  printf("%5d EMIT CNST: %d\n", byteBuffer.GetLength(), constant);
+  Log::Get().Print(LOGLEVEL_VERBOSE, "%5d EMIT CNST: %d\n",
+                   byteBuffer.GetLength(), constant);
 
   byteBuffer.Write32(constant);
 }
 
 void BytecodeBody::Emit(unsigned int constant)
 {
-  printf("%5d EMIT CNST %d\n", byteBuffer.GetLength(), constant);
+  Log::Get().Print(LOGLEVEL_VERBOSE, "%5d EMIT CNST %d\n",
+                   byteBuffer.GetLength(), constant);
 
   byteBuffer.WriteU32(constant);
 }
@@ -54,8 +57,8 @@ void BytecodeBody::Emit(const PackedValue &value)
     break;
   }
 
-  printf("%5d EMIT %s : %d\n", byteBuffer.GetLength(), typeString.c_str(),
-         value.value);
+  Log::Get().Print(LOGLEVEL_VERBOSE, "%5d EMIT %s : %d\n",
+                   byteBuffer.GetLength(), typeString.c_str(), value.value);
 
   byteBuffer.WriteBytes((char *)&value, sizeof(PackedValue));
 }
@@ -74,7 +77,8 @@ void BytecodeBody::EndFunction() {}
 
 Reservation BytecodeBody::Reserve(unsigned int numBytes)
 {
-  printf("%5d EMIT RESERVED %d\n", byteBuffer.GetLength(), numBytes);
+  Log::Get().Print(LOGLEVEL_VERBOSE, "%5d EMIT RESERVED %d\n",
+                   byteBuffer.GetLength(), numBytes);
   return Reservation(&byteBuffer, byteBuffer.Reserve(numBytes));
 }
 

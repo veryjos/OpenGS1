@@ -1,6 +1,7 @@
 #include <gs1/vm/Context.hpp>
 #include <gs1/vm/GStringFormatter.hpp>
 
+#include <gs1/common/Log.hpp>
 #include <regex>
 
 using namespace gs1;
@@ -33,24 +34,24 @@ std::string GStringFormatter::Format(Context *context, const std::string &type,
     GVariable *variable = context->GetVariable(param, GVARTYPE_NUMBER);
 
     if (variable && variable->GetVarType() == GVARTYPE_NUMBER) {
-      printf("#v %s=%f\n", param.c_str(),
-             ((GNumberVariable *)variable)->number);
+      Log::Get().Print(LOGLEVEL_VERBOSE, "#v %s=%f\n", param.c_str(),
+                       ((GNumberVariable *)variable)->number);
 
       return std::to_string(((GNumberVariable *)variable)->number);
     } else
-      printf("#v %s not found!\n", param.c_str());
+      Log::Get().Print(LOGLEVEL_VERBOSE, "#v %s not found!\n", param.c_str());
   }
   // String values
   else if (type == "s") {
     GVariable *variable = context->GetVariable(param, GVARTYPE_STRING);
 
     if (variable && variable->GetVarType() == GVARTYPE_STRING) {
-      printf("#s %s=%s\n", param.c_str(),
-             ((GStringVariable *)variable)->string.c_str());
+      Log::Get().Print(LOGLEVEL_VERBOSE, "#s %s=%s\n", param.c_str(),
+                       ((GStringVariable *)variable)->string.c_str());
 
       return ((GStringVariable *)variable)->string;
     } else
-      printf("#s %s not found!\n", param.c_str());
+      Log::Get().Print(LOGLEVEL_VERBOSE, "#s %s not found!\n", param.c_str());
   }
   // Substring values
   else if (type == "e") {
@@ -68,8 +69,8 @@ std::string GStringFormatter::Format(Context *context, const std::string &type,
     int length = std::stoi(results[2].str());
     std::string str = context->InterpolateString(results[3].str());
 
-    printf("#e %s[%d:%d] = %s\n", param.c_str(), startIndex, length,
-           str.c_str());
+    Log::Get().Print(LOGLEVEL_VERBOSE, "#e %s[%d:%d] = %s\n", param.c_str(),
+                     startIndex, length, str.c_str());
 
     return str.substr(startIndex, length);
   }

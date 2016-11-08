@@ -1,4 +1,5 @@
 #include "DebugVisitor.hpp"
+#include <gs1/common/Log.hpp>
 
 using namespace gs1;
 
@@ -10,9 +11,10 @@ DebugVisitor::DebugVisitor(ISource &source, bool printTerminals)
 void DebugVisitor::Visit(SyntaxTerminal *node)
 {
   if (printTerminals) {
-    printf("%*s", level, "");
-    printf("* %s(%s)\n", GetTokenTypeName(node->token.type),
-           node->token.text.c_str());
+    Log::Get().Print(LOGLEVEL_VERBOSE, "%*s", level, "");
+    Log::Get().Print(LOGLEVEL_VERBOSE, "* %s(%s)\n",
+                     GetTokenTypeName(node->token.type),
+                     node->token.text.c_str());
   }
 }
 
@@ -99,8 +101,8 @@ void DebugVisitor::PrintNode(SyntaxNode *node, const char *name)
     text += "...";
   }
 
-  printf("%*s", level, "");
-  printf("* %s(%s)\n", name, text.c_str());
+  Log::Get().Print(LOGLEVEL_VERBOSE, "%*s", level, "");
+  Log::Get().Print(LOGLEVEL_VERBOSE, "* %s(%s)\n", name, text.c_str());
 
   level += 2;
   SyntaxTreeVisitor::Visit(node);
