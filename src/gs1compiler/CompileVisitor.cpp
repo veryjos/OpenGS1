@@ -265,11 +265,11 @@ void CompileVisitor::Visit(StmtFunctionDecl *node)
 
   Print("Function Decl found: %s", funcName.c_str());
 
-  body.BeginFunction(funcName);
+  auto reservation = body.BeginFunction(funcName);
 
   SyntaxTreeVisitor::Visit(node);
 
-  body.EndFunction();
+  body.EndFunction(reservation);
 
   PrintLeaveNode();
 }

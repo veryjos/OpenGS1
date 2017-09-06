@@ -68,12 +68,23 @@ unsigned int BytecodeBody::GetCurrentPosition()
   return byteBuffer.GetLength();
 }
 
-void BytecodeBody::BeginFunction(std::string name)
+Reservation BytecodeBody::BeginFunction(std::string name)
 {
-  // Emit the stop
+  // Emit a jump over the function body
+  Emit(OP_JMP);
+  Reservation offsetReservation = Reserve(4);
+
+  return offsetReservation;
 }
 
-void BytecodeBody::EndFunction() {}
+void BytecodeBody::EndFunction(Reservation reservation)
+{
+  // Emit a return opcode to return to the last location we jumped-and-linked from
+  Emit(OP_RET);
+
+  // Emit how far we have to jump to skip the function
+  reservation.Emit(GetCurrentPosition() - reservation.GetPosition());
+}
 
 Reservation BytecodeBody::Reserve(unsigned int numBytes)
 {

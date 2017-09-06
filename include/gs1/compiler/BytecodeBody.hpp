@@ -62,9 +62,9 @@ public:
 
   void Emit(const PackedValue &value);
 
-  void BeginFunction(std::string name);
+  Reservation BeginFunction(std::string name);
 
-  void EndFunction();
+  void EndFunction(Reservation reservation);
 
   Reservation Reserve(unsigned int numBytes);
 
