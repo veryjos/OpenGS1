@@ -523,6 +523,21 @@ void CompileVisitor::Visit(ExprBinaryOp *node)
     }
   }
 
+  // Emit extra left operand for OpAssign
+  switch (node->op->token.type) {
+  case TokOpAddAssign:
+  case TokOpSubAssign:
+  case TokOpMulAssign:
+  case TokOpDivAssign:
+  case TokOpModAssign:
+  case TokOpPowAssign:
+    // Pushes ID
+    ((ExprId *)node->left)->Accept(this);
+
+  default:
+    break;
+  }
+
   // Emit operands
   SyntaxTreeVisitor::Visit(node);
 
@@ -545,28 +560,48 @@ void CompileVisitor::Visit(ExprBinaryOp *node)
     break;
 
   case TokOpAdd:
+  case TokOpAddAssign:
     body.Emit(OP_ADD);
     break;
 
   case TokOpSub:
+  case TokOpSubAssign:
     body.Emit(OP_SUB);
     break;
 
   case TokOpMul:
+  case TokOpMulAssign:
     body.Emit(OP_MUL);
     break;
 
   case TokOpDiv:
+  case TokOpDivAssign:
     body.Emit(OP_DIV);
     break;
 
   case TokOpMod:
+  case TokOpModAssign:
     body.Emit(OP_MOD);
     break;
 
   case TokOpPow:
+  case TokOpPowAssign:
     body.Emit(OP_POW);
     break;
+
+  default:
+    break;
+  }
+
+  // Emit OpAssign
+  switch (node->op->token.type) {
+  case TokOpAddAssign:
+  case TokOpSubAssign:
+  case TokOpMulAssign:
+  case TokOpDivAssign:
+  case TokOpModAssign:
+  case TokOpPowAssign:
+    body.Emit(OP_ASSIGN);
 
   default:
     break;
