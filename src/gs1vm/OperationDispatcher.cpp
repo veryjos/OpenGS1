@@ -241,14 +241,14 @@ OperationDispatcher::OperationDispatcher()
         *(PackedValue *)context->instructionPointer;
     context->instructionPointer += sizeof(PackedValue);
 
-    std::string commandName =
+    std::string funcName =
         ((GStringVariable *)context->UnpackValue(packedCommandName)
              .GetVariable())
             ->string;
 
-    Log::Get().Print(LOGLEVEL_VERBOSE, "CMD_CALL: %s\n", commandName.c_str());
+    Log::Get().Print(LOGLEVEL_VERBOSE, "FUNC_CALL: %s\n", funcName.c_str());
 
-    context->CallFunction(commandName);
+    context->CallFunction(funcName);
   };
 
   operationHandlers[OP_CMD_CALL] = [&](Context *context) {
