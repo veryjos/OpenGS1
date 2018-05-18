@@ -6,10 +6,11 @@
 #include "GFlagLibrary.hpp"
 #include "GOutputLibrary.hpp"
 #include "GStringLibrary.hpp"
+#include "GArrayLibrary.hpp"
 
 #include <iostream>
 
-#include "/home/jos/dev/emscripten/emsdk_portable/emscripten/master/system/include/emscripten/emscripten.h"
+#include "/usr/lib/emscripten/system/include/emscripten.h"
 
 using namespace gs1;
 
@@ -81,6 +82,10 @@ char *eval_string(char *sourceString)
     // Load and link the output library (message, print)
     auto outputLibrary = device.LoadLibrary<GOutputLibrary>();
     context->LinkLibrary(outputLibrary);
+
+    // Load and link the array library (arraylen)
+    auto arrayLibrary = device.LoadLibrary<GArrayLibrary>();
+    context->LinkLibrary(arrayLibrary);
 
     context->Run();
   }
