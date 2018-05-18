@@ -111,11 +111,11 @@ void CompileVisitor::Visit(StmtFor *node)
   body.Emit(OP_JEZ);
   Reservation failReservation = body.Reserve(4);
 
-  // Emit step
-  node->step->Accept(this);
-
   // Emit body
   node->body->Accept(this);
+
+  // Emit step
+  node->step->Accept(this);
 
   // Jump back to step condition
   body.Emit(OP_JMP);
