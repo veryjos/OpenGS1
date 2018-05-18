@@ -1,0 +1,126 @@
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+#menu {
+    flex-shrink: 0;
+    height: 36px;
+    display: flex;
+    border-bottom: 1px solid #ddd;
+}
+
+#menu > * {
+    display: inline-block;
+    font-size: 16px;
+    line-height: 20px;
+    margin: 4px;
+    margin-right: 0;
+    color: #444;
+}
+
+#menu > .last {
+    margin-right: 4px;
+}
+
+#menu > .button {
+    text-align: center;
+    padding: 4px 12px;
+    background-color: #eee;
+    cursor: pointer;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+    text-decoration: none;
+}
+
+#menu > .button:hover {
+    background-color: #ddd;
+}
+
+#menu > .button.fixed {
+    min-width: 64px;
+}
+
+#menu #examples {
+    flex-grow: 2;
+    border: solid 1px #ddd;
+}
+
+#menu #link {
+    flex-grow: 20;
+    padding: 4px;
+    border: solid 1px #ddd;
+}
+
+#menu .github {
+    flex-shrink: 0;
+    background-image: url(GitHub-Mark-32px.png);
+    background-size: 20px;
+    background-repeat: no-repeat;
+    background-position: 10px;
+    padding-left: 35px;
+}
+
+#content {
+    flex-grow: 20;
+    display: flex;
+    -ms-flex-direction: row;
+    flex-direction: row;
+}
+
+#editor {
+    display: flex;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    flex-grow: 20;
+}
+
+.CodeMirror {
+    flex-grow: 20;
+}
+
+.CodeMirror-scroll {
+    position: absolute !important;
+    width: 100%;
+}
+
+#logContainer {
+    position: relative;
+    width: 500px;
+    overflow: auto;
+    background-color: #eee;
+}
+
+@media (max-width: 1200px) {
+    #logContainer {
+        width: 300px;
+    }
+}
+
+@media (max-width: 900px) {
+    #content {
+        -ms-flex-direction: column;
+        flex-direction: column;
+    }
+
+    #logContainer {
+        width: 100%;
+        height: 200px;
+    }
+}
+
+#log  {
+    position: absolute;
+    padding: 6px;
+    white-space: pre;
+    font-family: monospace;
+    color: black;
+}

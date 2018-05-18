@@ -1,0 +1,91 @@
+<!doctype html> 
+<html>
+    <head>
+        <link rel="shortcut icon" href="Mond-icon.png" />
+        <title>OpenGS1 Sandbox</title>
+
+        <script src="gs1webconsole.js"></script>
+        
+        <link rel="stylesheet" href="gs1box.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+        
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.37.0/codemirror.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.37.0/theme/neat.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.37.0/codemirror.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.37.0/mode/clike/clike.min.js"></script>
+    </head>
+    
+    <body>
+        <div id="menu">
+            <a id="run" class="fixed button">Run</a>
+            <select id="examples">
+                <option value="" selected="selected">Examples...</option>
+                <option>strings</option>
+                <option>interpolators</option>
+                <option>loops</option>
+                <option>control flow</option>
+            </select>
+            <a href="https://github.com/simply-jos/OpenGS1" target="_blank" class="button github last">OpenGS1 on GitHub</a>
+        </div>
+        <div id="content">
+            <div id="editor">
+                <textarea id="codeEditor">
+whoopsie
+test
+one
+</textarea>
+            </div>
+            <div id="logContainer">
+                <div id="log"></div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            var editor = CodeMirror.fromTextArea(document.getElementById("codeEditor"), {
+                mode: "clike",
+                theme: "neat",
+                lineNumbers: true,
+                indentUnit: 2,
+                smartIndent: false,
+                styleActiveLine: true,
+                viewportMargin: Infinity,
+                extraKeys: {"Tab": "indentMore", "Shift-Tab": "indentLess"}
+            });
+            
+            editor.setSize("100%", "100%");
+            
+            var runButton = $("#run");
+            var examples = $("#examples");
+            var logArea = $("#log");
+
+            function loadExample(name) {
+                editor.setValue("");
+                logArea.html("");
+
+                var examples = {
+                  "strings": "setstring a,foo;\naddstring a,bar;\n\nprint #s(a);\n\nif (strequals(a,foobar)) {\n  print weeew they match!;\n}",
+
+                  "interpolators": "// Number interpolator\na = 1;\nb = 2;\nc = 3;\n\nprint #v(a) #v(b) #v(c);\n\n\n// String interpolator\nsetstring test,racecar;\n\n// Print full string\nprint #s(test);\n// Print two substrings\nprint #e(0, 4, #s(test)) #e(4, 3, #s(test));"
+                };
+
+                editor.setValue(examples[name]);
+            }
+            
+            runButton.click(function() {
+                logArea.html("Running...<br /><br />");
+
+                var output = ccall("eval_string", "string", ["string"], [editor.getValue()]);
+
+                logArea.append(output);
+            });
+
+            examples.change(function () {
+                var newExample = examples.val();
+                if (newExample == "")
+                    return;
+                    
+                loadExample(newExample);
+            });
+        </script>
+    </body>
+</html>
