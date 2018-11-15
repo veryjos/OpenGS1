@@ -3,6 +3,7 @@
 
 #include <gs1/common/Log.hpp>
 #include <regex>
+#include <cstdio>
 
 using namespace gs1;
 
@@ -37,7 +38,12 @@ std::string GStringFormatter::Format(Context *context, const std::string &type,
       Log::Get().Print(LOGLEVEL_VERBOSE, "#v %s=%f\n", param.c_str(),
                        ((GNumberVariable *)variable)->number);
 
-      return std::to_string(((GNumberVariable *)variable)->number);
+      // TODO: Fix this
+      std::string output;
+      output.resize(16);
+      snprintf(&output[0], 16, "%.6g", ((GNumberVariable *)variable)->number);
+
+      return output;
     } else
       Log::Get().Print(LOGLEVEL_VERBOSE, "#v %s not found!\n", param.c_str());
   }
