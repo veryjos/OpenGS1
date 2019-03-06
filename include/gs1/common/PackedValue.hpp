@@ -10,8 +10,6 @@ enum PackedValueType {
   PACKVALUE_NAMED
 };
 
-// FIXME: Don't rely on bitpacking..
-
 #ifdef _MSC_VER
 #pragma pack(push, 1)
 #endif
@@ -31,11 +29,6 @@ __attribute__((packed));
 #pragma pack(push, 0)
 #endif
 
-// FIXME: Deserialize properly. For the sake of testing/iterating quickly, do it
-// lazy.
-
-// FIXME: Could use this + endianness to detect when the target platform needs a
-// slow/safe deserialize option.
 static_assert(
     sizeof(PackedValue) == 4,
     "Size of PackedValue isn't 4 bytes, can cause problems when deserializing");
