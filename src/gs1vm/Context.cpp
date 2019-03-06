@@ -279,7 +279,7 @@ std::string Context::InterpolateString(std::string inputString)
           // Skip the leading bracket
           p++;
 
-          while (depth > 0) {
+          while (true) {
             if (*p == '(')
               depth++;
 
