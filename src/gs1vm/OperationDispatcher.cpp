@@ -3,7 +3,6 @@
 
 using namespace gs1;
 
-static Bytecode *bytecode;
 static bool g_initialized = false;
 static std::function<void(Context *context)> operationHandlers[OP_NUM_OPS];
 
