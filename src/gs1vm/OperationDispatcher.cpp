@@ -115,8 +115,8 @@ OperationDispatcher::OperationDispatcher()
   };
 
   operationHandlers[OP_ADD] = [&](Context *context) {
-    float rValue = context->stack.Pop().GetNumber();
-    float lValue = context->stack.Pop().GetNumber();
+    double rValue = context->stack.Pop().GetNumber();
+    double lValue = context->stack.Pop().GetNumber();
 
     // Add the two values and push the result
     context->stack.Push(GValue(lValue + rValue));
@@ -126,8 +126,8 @@ OperationDispatcher::OperationDispatcher()
   };
 
   operationHandlers[OP_SUB] = [&](Context *context) {
-    float rValue = context->stack.Pop().GetNumber();
-    float lValue = context->stack.Pop().GetNumber();
+    double rValue = context->stack.Pop().GetNumber();
+    double lValue = context->stack.Pop().GetNumber();
 
     // Subtract the two values and push the result
     context->stack.Push(GValue(lValue - rValue));
@@ -137,8 +137,8 @@ OperationDispatcher::OperationDispatcher()
   };
 
   operationHandlers[OP_MUL] = [&](Context *context) {
-    float rValue = context->stack.Pop().GetNumber();
-    float lValue = context->stack.Pop().GetNumber();
+    double rValue = context->stack.Pop().GetNumber();
+    double lValue = context->stack.Pop().GetNumber();
 
     // Multiply the two values and push the result
     context->stack.Push(GValue(lValue * rValue));
@@ -148,8 +148,8 @@ OperationDispatcher::OperationDispatcher()
   };
 
   operationHandlers[OP_DIV] = [&](Context *context) {
-    float rValue = context->stack.Pop().GetNumber();
-    float lValue = context->stack.Pop().GetNumber();
+    double rValue = context->stack.Pop().GetNumber();
+    double lValue = context->stack.Pop().GetNumber();
 
     // Multiply the two values and push the result
     context->stack.Push(GValue(lValue / rValue));
@@ -159,8 +159,8 @@ OperationDispatcher::OperationDispatcher()
   };
 
   operationHandlers[OP_MOD] = [&](Context *context) {
-    float rValue = context->stack.Pop().GetNumber();
-    float lValue = context->stack.Pop().GetNumber();
+    double rValue = context->stack.Pop().GetNumber();
+    double lValue = context->stack.Pop().GetNumber();
 
     // Multiply the two values and push the result
     context->stack.Push(GValue(fmod(lValue, rValue)));
@@ -170,8 +170,8 @@ OperationDispatcher::OperationDispatcher()
   };
 
   operationHandlers[OP_POW] = [&](Context *context) {
-    float rValue = context->stack.Pop().GetNumber();
-    float lValue = context->stack.Pop().GetNumber();
+    double rValue = context->stack.Pop().GetNumber();
+    double lValue = context->stack.Pop().GetNumber();
 
     // Multiply the two values and push the result
     context->stack.Push(GValue(powf(lValue, rValue)));
@@ -295,8 +295,8 @@ OperationDispatcher::OperationDispatcher()
   };
 
   operationHandlers[OP_EQ] = [&](Context *context) {
-    float rValue = context->stack.Pop().GetNumber();
-    float lValue = context->stack.Pop().GetNumber();
+    double rValue = context->stack.Pop().GetNumber();
+    double lValue = context->stack.Pop().GetNumber();
 
     // Multiply the two values and push the result
     context->stack.Push(GValue(lValue == rValue));
@@ -306,8 +306,8 @@ OperationDispatcher::OperationDispatcher()
   };
 
   operationHandlers[OP_LT] = [&](Context *context) {
-    float rValue = context->stack.Pop().GetNumber();
-    float lValue = context->stack.Pop().GetNumber();
+    double rValue = context->stack.Pop().GetNumber();
+    double lValue = context->stack.Pop().GetNumber();
 
     // Compare the two values and push the result
     context->stack.Push(GValue(lValue < rValue));
@@ -317,8 +317,8 @@ OperationDispatcher::OperationDispatcher()
   };
 
   operationHandlers[OP_GT] = [&](Context *context) {
-    float rValue = context->stack.Pop().GetNumber();
-    float lValue = context->stack.Pop().GetNumber();
+    double rValue = context->stack.Pop().GetNumber();
+    double lValue = context->stack.Pop().GetNumber();
 
     // Compare the two values and push the result
     context->stack.Push(GValue(lValue > rValue));
@@ -328,8 +328,8 @@ OperationDispatcher::OperationDispatcher()
   };
 
   operationHandlers[OP_LTE] = [&](Context *context) {
-    float rValue = context->stack.Pop().GetNumber();
-    float lValue = context->stack.Pop().GetNumber();
+    double rValue = context->stack.Pop().GetNumber();
+    double lValue = context->stack.Pop().GetNumber();
 
     // Multiply the two values and push the result
     context->stack.Push(GValue(lValue <= rValue));
@@ -339,8 +339,8 @@ OperationDispatcher::OperationDispatcher()
   };
 
   operationHandlers[OP_GTE] = [&](Context *context) {
-    float rValue = context->stack.Pop().GetNumber();
-    float lValue = context->stack.Pop().GetNumber();
+    double rValue = context->stack.Pop().GetNumber();
+    double lValue = context->stack.Pop().GetNumber();
 
     // Multiply the two values and push the result
     context->stack.Push(GValue(lValue >= rValue));
